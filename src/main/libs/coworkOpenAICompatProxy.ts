@@ -1940,10 +1940,13 @@ async function handleChatCompletionsStreamResponse(
   });
 
   if (!upstreamResponse.body) {
+    coworkLog('ERROR', 'OpenAICompatProxy', 'Upstream returned empty stream');
     emitSSE(res, 'error', createAnthropicErrorBody('Upstream returned empty stream', 'stream_error'));
     res.end();
     return;
   }
+
+  coworkLog('INFO', 'OpenAICompatProxy', 'Starting stream handling');
 
   const reader = upstreamResponse.body.getReader();
   const decoder = new TextDecoder();
@@ -1972,6 +1975,7 @@ async function handleChatCompletionsStreamResponse(
     }
 
     buffer += decoder.decode(value, { stream: true });
+    coworkLog('DEBUG', 'OpenAICompatProxy', 'Stream chunk received', { size: value.length });
 
     let boundary = findSSEPacketBoundary(buffer);
     while (boundary) {
@@ -2176,8 +2180,10 @@ async function handleRequest(
   let requestBodyRaw = '';
   try {
     requestBodyRaw = await readRequestBody(req);
+    coworkLog('INFO', 'OpenAICompatProxy', 'Request body read complete', { length: requestBodyRaw.length });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid request body';
+    const message = error instanceof Error ? error.message : 'Failed to read request body';
+    coworkLog('ERROR', 'OpenAICompatProxy', 'Failed to read request body', { error: message });
     writeJSON(res, 400, createAnthropicErrorBody(message, 'invalid_request_error'));
     return;
   }
@@ -2222,11 +2228,18 @@ async function handleRequest(
     targetURL: string
   ): Promise<Response> => {
     currentTargetURL = targetURL;
-    return session.defaultSession.fetch(targetURL, {
+    coworkLog('INFO', 'OpenAICompatProxy', 'Sending upstream request', { url: targetURL });
+    const upstreamRes = await session.defaultSession.fetch(targetURL, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
     });
+    coworkLog('INFO', 'OpenAICompatProxy', 'Received upstream response', {
+      status: upstreamRes.status,
+      ok: upstreamRes.ok,
+      url: targetURL
+    });
+    return upstreamRes;
   };
 
   let upstreamResponse: Response;
