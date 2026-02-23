@@ -274,7 +274,11 @@ export class IMCoworkHandler extends EventEmitter {
 
   private isSessionNotFoundError(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
-    return /^Session\s.+\snot found$/i.test(message.trim());
+    const trimmed = message.trim();
+    return (
+      /^Session\s.+\snot found$/i.test(trimmed) ||
+      trimmed.includes('No conversation found with session ID')
+    );
   }
 
   /**

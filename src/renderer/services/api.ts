@@ -258,7 +258,7 @@ class ApiService {
     const normalizedHint = providerHint?.toLowerCase();
     if (
       normalizedHint
-      && ['openai', 'deepseek', 'moonshot', 'zhipu', 'minimax', 'qwen', 'openrouter', 'gemini', 'anthropic', 'ollama'].includes(normalizedHint)
+      && ['openai', 'deepseek', 'moonshot', 'zhipu', 'minimax', 'qwen', 'openrouter', 'gemini', 'anthropic', 'ollama', 'groq'].includes(normalizedHint)
     ) {
       return normalizedHint;
     }
@@ -279,6 +279,8 @@ class ApiService {
       return 'minimax';
     } else if (normalizedModelId.startsWith('qwen') || normalizedModelId.startsWith('qvq')) {
       return 'qwen';
+    } else if (normalizedModelId.startsWith('llama') || normalizedModelId.startsWith('mixtral')) {
+      return 'groq';
     }
     return 'openai'; // 默认使用 OpenAI 兼容格式
   }
@@ -396,8 +398,8 @@ class ApiService {
 
       // 检测是否是 thinking 模型
       const isThinkingModel = modelId.includes('claude-3-7') ||
-                              modelId.includes('claude-sonnet-4') ||
-                              modelId.includes('claude-opus-4');
+        modelId.includes('claude-sonnet-4') ||
+        modelId.includes('claude-opus-4');
 
       if (isThinkingModel) {
         requestBody.thinking = {
@@ -674,15 +676,15 @@ class ApiService {
           : this.buildOpenAICompatibleChatCompletionsUrl(config.baseUrl, provider);
         const requestBody: Record<string, unknown> = useResponsesApi
           ? {
-              model: modelId,
-              input: responseInputMessages,
-              stream: true,
-            }
+            model: modelId,
+            input: responseInputMessages,
+            stream: true,
+          }
           : {
-              model: modelId,
-              messages: messages,
-              stream: true,
-            };
+            model: modelId,
+            messages: messages,
+            stream: true,
+          };
         if (useResponsesApi && systemInstructions) {
           requestBody.instructions = systemInstructions;
         }

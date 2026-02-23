@@ -2253,7 +2253,7 @@ if (!gotTheLock) {
     // We don't trigger permission dialogs at startup to avoid annoying users
 
     // Ensure default working directory exists
-    const defaultProjectDir = path.join(os.homedir(), 'lobsterai', 'project');
+    const defaultProjectDir = path.join('D:', '006AI', 'LobsterAI', 'project');
     if (!fs.existsSync(defaultProjectDir)) {
       fs.mkdirSync(defaultProjectDir, { recursive: true });
       console.log('Created default project directory:', defaultProjectDir);

@@ -105,6 +105,17 @@ export interface AppConfig {
         supportsImage?: boolean;
       }>;
     };
+    groq: {
+      enabled: boolean;
+      apiKey: string;
+      baseUrl: string;
+      apiFormat?: 'anthropic' | 'openai';
+      models?: Array<{
+        id: string;
+        name: string;
+        supportsImage?: boolean;
+      }>;
+    };
     anthropic: {
       enabled: boolean;
       apiKey: string;
@@ -191,7 +202,16 @@ export const defaultConfig: AppConfig = {
       models: [
         { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', supportsImage: true },
         { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', supportsImage: true },
-        { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash', supportsImage: true }
+      ]
+    },
+    groq: {
+      enabled: false,
+      apiKey: '',
+      baseUrl: 'https://api.groq.com/openai/v1',
+      apiFormat: 'openai',
+      models: [
+        { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', supportsImage: false },
+        { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7b', supportsImage: false }
       ]
     },
     anthropic: {
@@ -301,7 +321,7 @@ export const CONFIG_KEYS = {
 
 // 模型提供商分类
 export const CHINA_PROVIDERS = ['deepseek', 'moonshot', 'qwen', 'zhipu', 'minimax', 'ollama'] as const;
-export const GLOBAL_PROVIDERS = ['openai', 'gemini', 'anthropic', 'openrouter'] as const;
+export const GLOBAL_PROVIDERS = ['openai', 'gemini', 'anthropic', 'openrouter', 'groq'] as const;
 export const EN_PRIORITY_PROVIDERS = ['openai', 'anthropic', 'gemini'] as const;
 
 /**
@@ -315,7 +335,7 @@ export const getVisibleProviders = (language: 'zh' | 'en'): readonly string[] =>
 
   // 中文 → 中国版，英文 → 国际版
   if (language === 'zh') {
-    return CHINA_PROVIDERS;
+    return [...CHINA_PROVIDERS, ...GLOBAL_PROVIDERS];
   }
 
   const orderedProviders = [
