@@ -468,6 +468,9 @@ export async function getEnhancedEnv(target: OpenAICompatProxyTarget = 'local'):
     env.https_proxy = proxyUrl;
     env.HTTP_PROXY = proxyUrl;
     env.HTTPS_PROXY = proxyUrl;
+    // Ensure local lookback is never proxied
+    env.no_proxy = 'localhost,127.0.0.1,::1';
+    env.NO_PROXY = 'localhost,127.0.0.1,::1';
     console.log('Injected system proxy for subprocess:', proxyUrl);
   }
 

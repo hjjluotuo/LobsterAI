@@ -8,6 +8,7 @@ import {
   openAIToAnthropic,
   type OpenAIStreamChunk,
 } from './coworkFormatTransform';
+import { coworkLog } from './coworkLogger';
 import type { ScheduledTaskStore, ScheduledTaskInput } from '../scheduledTaskStore';
 import type { Scheduler } from './scheduler';
 
@@ -2165,6 +2166,13 @@ async function handleRequest(
     return;
   }
 
+  coworkLog('INFO', 'OpenAICompatProxy', 'Incoming request', {
+    method,
+    path: url.pathname,
+    upstreamModel: upstreamConfig.model,
+    upstreamBaseURL: upstreamConfig.baseURL,
+  });
+
   let requestBodyRaw = '';
   try {
     requestBodyRaw = await readRequestBody(req);
@@ -2268,7 +2276,7 @@ async function handleRequest(
               } else {
                 console.info(
                   '[cowork-openai-compat-proxy] Retried request with max_completion_tokens '
-                    + `converted from max_tokens=${convertResult.convertedTo}`
+                  + `converted from max_tokens=${convertResult.convertedTo}`
                 );
               }
             } catch (error) {
